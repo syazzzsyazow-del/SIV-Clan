@@ -1,0 +1,131 @@
+-- SIV Clan l Private | Script by SyazwiOnTop | Leader: SIV_Ryuu | TikTok: @Syazwi101
+local P,RS,VIM=game.Players.LocalPlayer,game:GetService("ReplicatedStorage"),game:GetService("VirtualInputManager")
+local HB=game:GetService("RunService").Heartbeat
+local function note(m)pcall(function()game:GetService("StarterGui"):SetCore("SendNotification",{Title="SIV Clan",Text=tostring(m):sub(1,180),Duration=10})end)warn(m)end
+
+local ok,e=pcall(function()
+local ME,LS=P:WaitForChild("muscleEvent",15),P:WaitForChild("leaderstats",15)
+assert(ME and LS,"Bukan game Muscle Legends / data tak jumpa")
+local ST,RB,DU=LS:WaitForChild("Strength"),LS:WaitForChild("Rebirths"),P:WaitForChild("Durability")
+
+P.Idled:Connect(function()VIM:SendKeyEvent(true,Enum.KeyCode.Y,false,game)task.wait(.05)VIM:SendKeyEvent(false,Enum.KeyCode.Y,false,game)end)
+
+local function F(n)n=n or 0 local u,i={"","K","M","B","T","Qa","Qi"},1
+while n>=1000 and i<#u do n=n/1000 i=i+1 end
+return i==1 and string.format("%.0f",n) or string.format("%.2f%s",n,u[i])end
+local function T(s)local f=math.floor return string.format("%dd %dh %dm %ds",f(s/86400),f(s%86400/3600),f(s%3600/60),f(s%60))end
+local function R(n,v)return n..": "..F(v).."/s | "..F(v*60).."/min | "..F(v*3600).."/h | "..F(v*86400).."/d"end
+
+local W=loadstring(game:HttpGet("https://raw.githubusercontent.com/memejames/elerium-v2-ui-library/main/Library",true))():AddWindow("SIV Clan l Private",{main_color=Color3.fromRGB(124,58,237),min_size=Vector2.new(500,500),can_resize=false})
+local I,S,B=W:AddTab("Info"),W:AddTab("Fast Strength"),W:AddTab("Fast Rebirth")
+
+for _,v in ipairs{"SIV Clan Script","Script Make By : SyazwiOnTop","Leader Clan : SIV_Ryuu","","TikTok Who Make The Script : @Syazwi101"}do I:AddLabel(v)end
+
+-- PETS {rep speed, strength, durability, rebirth}
+local PETS={["Omega Overlord"]={20,0,0,0},["Swift Samurai"]={15,0,0,0},["Powercore Hound"]={0,25,15,0},["Titanium Hydra"]={0,0,0,2},["Tribal Overlord"]={0,0,0,2},["Inferno Unicorn"]={0,25,25,0},["Common Boss Pet"]={5,0,0,0},["Rare Boss Pet"]={7,0,0,0},["Epic Boss Pet"]={10,0,0,0},["Rainbow Boss Pet"]={10,7,0,0},["Legendary Boss Pet"]={10,10,0,0},["Mythic Boss Pet"]={10,20,0,0},["Inferno Drake"]={40,0,0,0}}
+local function equip(reb)
+ local ev,pets=RS.rEvents.equipPetEvent,{}
+ for _,f in ipairs(P.petsFolder:GetChildren())do if f:IsA("Folder")then for _,p in ipairs(f:GetChildren())do
+  ev:FireServer("unequipPet",p)local c=PETS[p.Name]if c then pets[#pets+1]={p,c}end end end end
+ task.wait(.08)
+ local n,rs=0,0
+ if reb then
+  table.sort(pets,function(a,b)return a[2][4]>b[2][4]end)
+  for _,p in ipairs(pets)do if n>=12 or p[2][4]<=0 then break end ev:FireServer("equipPet",p[1])n=n+1 end
+ else
+  table.sort(pets,function(a,b)return a[2][1]>b[2][1]end)
+  local used={}
+  for _,p in ipairs(pets)do if n>=12 or rs>=100 or p[2][1]<=0 then break end ev:FireServer("equipPet",p[1])used[p]=1 n=n+1 rs=rs+p[2][1]end
+  table.sort(pets,function(a,b)return a[2][2]+a[2][3]>b[2][2]+b[2][3]end)
+  for _,p in ipairs(pets)do if n>=12 then break end if not used[p]and p[2][2]+p[2][3]>0 then ev:FireServer("equipPet",p[1])n=n+1 end end
+ end
+end
+
+-- FAST STRENGTH
+local L={}
+for i,v in ipairs{"Status: Inactive","Runtime: 0d 0h 0m 0s","","","Str Pace: -- /s | -- /min | -- /h | -- /d","Dura Pace: -- /s | -- /min | -- /h | -- /d","Str Avg: -- /s | -- /min | -- /h | -- /d","Dura Avg: -- /s | -- /min | -- /h | -- /d"}do L[i]=S:AddLabel(v)end
+S:AddLabel("Recommended Speed: 659")
+local run,t0,el,s0,d0,lc,ls,ld=false,0,0,ST.Value,DU.Value,tick(),ST.Value,DU.Value
+S:AddSwitch("Fast Strength",function(s)
+ run=s
+ if s then
+  t0,lc,ls,ld=tick(),tick(),ST.Value,DU.Value
+  task.spawn(function()
+   local rate,tok,last=200,0,os.clock()
+   while run do
+    local n=os.clock()local d=math.min(.1,n-last)last=n
+    rate=math.min(659,rate*1.05)tok=math.min(24,tok+rate*d)
+    local c=math.min(math.floor(tok),math.max(1,math.min(24,math.ceil(rate*.05))))
+    for _=1,c do if not run then break end ME:FireServer("rep")end
+    tok=tok-c L[1].Text="Status: Farming | "..math.floor(rate).." reps/s"HB:Wait()
+   end
+   L[1].Text="Status: Inactive"
+  end)
+ elseif t0>0 then el=el+tick()-t0 t0=0 L[1].Text="Status: Stopped"end
+end):Set(false)
+task.spawn(function()
+ while true do
+  local tot=el+(run and t0>0 and tick()-t0 or 0)
+  L[2].Text="Runtime: "..T(tot)
+  L[3].Text="Strength: "..F(ST.Value).." | Gained: "..F(ST.Value-s0)
+  L[4].Text="Durability: "..F(DU.Value).." | Gained: "..F(DU.Value-d0)
+  if run and tick()-lc>=10 then
+   local dt=tick()-lc local sp,dp=(ST.Value-ls)/dt,(DU.Value-ld)/dt
+   if sp>0 then L[5].Text=R("Str Pace",sp)end
+   if dp>0 then L[6].Text=R("Dura Pace",dp)end
+   if tot>0 then L[7].Text=R("Str Avg",(ST.Value-s0)/tot)L[8].Text=R("Dura Avg",(DU.Value-d0)/tot)end
+   lc,ls,ld=tick(),ST.Value,DU.Value
+  end
+  task.wait(1)
+ end
+end)
+
+-- FAST REBIRTH
+local st,rt,rs_,rp=B:AddLabel("Status: Inactive"),B:AddLabel("Runtime: 0d 0h 0m 0s"),B:AddLabel("Rebirths: "..F(RB.Value).." | Gained: 0"),B:AddLabel("Pace: -- / Hour | -- / Day | -- / Week")
+local on,bt,be,base,lt,lv=false,0,0,RB.Value,tick(),RB.Value
+RB:GetPropertyChangedSignal("Value"):Connect(function()
+ if on and RB.Value>lv then
+  local ph=3600/((tick()-lt)/(RB.Value-lv))
+  rp.Text="Pace: "..F(ph).." / Hour | "..F(ph*24).." / Day | "..F(ph*168).." / Week"
+  lt,lv=tick(),RB.Value
+ end
+end)
+B:AddSwitch("Fast Rebirth",function(s)
+ on=s
+ if s then
+  st.Text="Status: Rebirthing"bt=tick()base,lt,lv=RB.Value,tick(),RB.Value
+  task.spawn(function()
+   while on do
+    st.Text="Status: Equipping farm pets..."pcall(equip,false)task.wait(.15)
+    local target=5000+RB.Value*2550
+    st.Text="Status: Farming... ("..F(target)..")"
+    local burst=P.MembershipType==Enum.MembershipType.Premium and 6 or 12
+    while on and ST.Value<target do
+     for _=1,burst do if not on then break end ME:FireServer("rep")end
+     task.wait(.01)
+    end
+    if on and ST.Value>=target then
+     st.Text="Status: Equipping rebirth pets..."pcall(equip,true)task.wait(.1)
+     st.Text="Status: Rebirthing..."
+     local b4,n=RB.Value,0
+     repeat pcall(function()RS.rEvents.rebirthRemote:InvokeServer("rebirthRequest")end)n=n+1 task.wait(.01)until RB.Value>b4 or not on or n>50
+    end
+    if on then
+     local n=0
+     while on and(not P.Character or not P.Character:FindFirstChild("HumanoidRootPart"))and n<50 do task.wait(.1)n=n+1 end
+     task.wait(.2)
+    end
+   end
+   st.Text="Status: Inactive"
+  end)
+ elseif bt>0 then be=be+tick()-bt bt=0 st.Text="Status: Stopped"end
+end):Set(false)
+task.spawn(function()
+ while true do
+  rt.Text="Runtime: "..T(be+(on and bt>0 and tick()-bt or 0))
+  rs_.Text="Rebirths: "..F(RB.Value).." | Gained: "..F(RB.Value-base)
+  task.wait(1)
+ end
+end)
+end)
+if not ok then note(e)end
